@@ -1,0 +1,79 @@
+# trigger:
+#  branches:
+#    include:
+#      - main
+
+trigger:
+- main
+
+pool: 'windows-2022'
+
+variables:
+  buildConfiguration: 'Release'
+  azureWebAppName: 'my-aspnet-webapp' # apna Azure Web App ka naam
+  projectFile: '**/*.csproj'
+
+stages:
+  - stage:
+    displayName: Restore NuGet Packages
+    jobs:
+      - job:
+        displayName: Restore NuGet Packages
+        steps:
+          - task: DotNetCoreCLI@2
+            displayName: Restore NuGet Packages
+            inputs:
+              command: restore
+              projects: $(projectFile)
+  
+  - stage: 
+    displayName: Build Project
+    jobs:
+      - job: 
+        displayName: Build Project
+        steps:
+          - task: DotNetCoreCLI@2
+            displayName: Build Project
+            inputs:
+              command: build
+              projects: $(projectFile)
+              arguments: '--configuration $(buildConfiguration)'
+  
+  - stage: 
+    displayName: Publish Project
+    jobs:
+      - job: 
+        displayName: Publish Project
+        steps:
+          - task: DotNetCoreCLI@2
+            displayName: Publish
+            inputs:
+              command: publish
+              projects: $(projectFile)
+              arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+
+  - stage: 
+    displayName: Upload Artifact
+    jobs:
+      - job: 
+        displayName: Upload Artifact
+        steps:
+          - task: PublishBuildArtifacts@1
+            displayName: Publish Artifact
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+              ArtifactName: Gunjan-Artifacts
+
+  - stage: 
+    displayName: Deploy to Azure Web App
+    jobs:
+      - job:
+        displayName: Deploy to Azure Web App
+        steps:
+          - task: AzureWebApp@1
+            displayName: Deploy to Azure Web App
+            inputs:
+              appType: webAppLinux
+              azureSubscription: 'Serv-Conn'
+              appName: '$(azureWebAppName)'
+              package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
