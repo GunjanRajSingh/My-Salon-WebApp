@@ -49,21 +49,17 @@
 #     appName: '$(webAppName)'              # Azure Web App ka naam
 #     package: '$(zipPath)'                 # ZIP file ka path
 
-
-# trigger:
-#  branches:
-#    include:
-#      - main
+# =============================================================================================================================================================
 
 trigger:
-- main   # Jab main branch me push hoga, pipeline run karega
+- main
 
 pool:
-  vmImage: 'windows-latest'  # Microsoft-hosted Windows agent
+  vmImage: 'windows-latest'
 
 variables:
   buildConfiguration: 'Release'
-  azureWebAppName: 'my-aspnet-webapp' # apna Azure Web App ka naam
+  azureWebAppName: 'My-Salon-WebApp'
   projectFile: '**/*.csproj'
 
 stages:
