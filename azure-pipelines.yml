@@ -6,7 +6,7 @@ pool:
 
 variables:
   buildConfiguration: 'Release'
-  project: 'SalonWebsite/SalonWebsite.csproj'      # Apne .csproj ka correct path
+  project: '/src/SalonWebsite/SalonWebsite.csproj'      # Apne .csproj ka correct path
   publishDir: '$(Build.SourcesDirectory)/publish'
   webAppName: 'my-salon-webapp'                    # Apne Azure Web App ka naam
   zipPath: '$(Build.ArtifactStagingDirectory)/app.zip'
