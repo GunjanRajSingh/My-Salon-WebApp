@@ -60,7 +60,7 @@ pool:
 variables:
   buildConfiguration: 'Release'
   azureWebAppName: 'My-Salon-WebApp'
-  projectFile: 'SalonWebsite/SalonWebsite.csproj'
+  projects: '**/*.csproj'
 
 stages:
   - stage: 
