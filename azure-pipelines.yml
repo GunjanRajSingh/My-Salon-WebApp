@@ -60,13 +60,13 @@ pool:
 variables:
   buildConfiguration: 'Release'
   azureWebAppName: 'My-Salon-WebApp'
-  projectFile: '**/*.csproj'
+  projects: '**/*.csproj'
 
 stages:
-  - stage: 
+  - stage: Install_DotNet
     displayName: Install .NET SDK
     jobs:
-      - job: 
+      - job: install_sdk
         displayName: Install .NET SDK
         steps:
           - task: UseDotNet@2
@@ -74,60 +74,66 @@ stages:
             inputs:
               packageType: 'sdk'
               version: '6.0.x'
-  - stage:
+
+  - stage: Restore_NuGet
     displayName: Restore NuGet Packages
+    dependsOn: Install_DotNet
     jobs:
-      - job:
+      - job: restore
         displayName: Restore NuGet Packages
         steps:
           - task: DotNetCoreCLI@2
             displayName: Restore NuGet Packages
             inputs:
               command: restore
-              projects: $(projectFile)
-  
-  - stage: 
+              projects: $(projects)
+
+  - stage: Build_Project
     displayName: Build Project
+    dependsOn: Restore_NuGet
     jobs:
-      - job: 
+      - job: build
         displayName: Build Project
         steps:
           - task: DotNetCoreCLI@2
             displayName: Build Project
             inputs:
               command: build
-              projects: $(projectFile)
+              projects: $(projects)
               arguments: '--configuration $(buildConfiguration)'
-  
-  - stage: 
+
+  - stage: Publish_Project
     displayName: Publish Project
+    dependsOn: Build_Project
     jobs:
-      - job: 
+      - job: publish
         displayName: Publish Project
         steps:
           - task: DotNetCoreCLI@2
             displayName: Publish
             inputs:
               command: publish
-              projects: $(projectFile)
+              projects: $(projects)
               arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
 
-  - stage: 
+  - stage: Upload_Artifact
     displayName: Upload Artifact
+    dependsOn: Publish_Project
     jobs:
-      - job: 
+      - job: upload
         displayName: Upload Artifact
         steps:
           - task: PublishBuildArtifacts@1
             displayName: Publish Artifact
             inputs:
               PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-              ArtifactName: Gunjan-Artifacts
+              ArtifactName: 'Gunjan-Artifacts'
 
-  - stage: 
+  - stage: Deploy_WebApp
     displayName: Deploy to Azure Web App
+    dependsOn: Upload_Artifact
     jobs:
-      - job:
+      - job: deploy
         displayName: Deploy to Azure Web App
         steps:
           - task: AzureWebApp@1
