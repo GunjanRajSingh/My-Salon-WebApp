@@ -60,7 +60,8 @@ pool:
 variables:
   buildConfiguration: 'Release'
   azureWebAppName: 'My-Salon-WebApp'
-  projects: '**/*.csproj'
+  # projects: '**/*.csproj'
+  projects: 'SalonWebsite/SalonWebsite.csproj'
 
 stages:
   - stage: Install_DotNet
@@ -82,70 +83,70 @@ stages:
       - job: restore
         displayName: Restore NuGet Packages
         steps:
-          # - task: DotNetCoreCLI@2
-          #   displayName: Restore NuGet Packages
-          #   inputs:
-          #     command: restore
-          #     projects: $(projects)
+          - task: DotNetCoreCLI@2
+            displayName: Restore NuGet Packages
+            inputs:
+              command: restore
+              projects: $(projects)
           
-          - task: DotNetCoreCLI@2
-            inputs:
-              azureSubscription: 'Serv-Conn'
-              command: 'restore'
-              feedsToUse: 'select'
+          # - task: DotNetCoreCLI@2
+          #   inputs:
+          #     azureSubscription: 'Serv-Conn'
+          #     command: 'restore'
+          #     feedsToUse: 'select'
 
-  - stage: Build_Project
-    displayName: Build Project
-    dependsOn: Restore_NuGet
-    jobs:
-      - job: build
-        displayName: Build Project
-        steps:
-          - task: DotNetCoreCLI@2
-            displayName: Build Project
-            inputs:
-              command: build
-              projects: $(projects)
-              arguments: '--configuration $(buildConfiguration)'
+  # - stage: Build_Project
+  #   displayName: Build Project
+  #   dependsOn: Restore_NuGet
+  #   jobs:
+  #     - job: build
+  #       displayName: Build Project
+  #       steps:
+  #         - task: DotNetCoreCLI@2
+  #           displayName: Build Project
+  #           inputs:
+  #             command: build
+  #             projects: $(projects)
+  #             arguments: '--configuration $(buildConfiguration)'
 
-  - stage: Publish_Project
-    displayName: Publish Project
-    dependsOn: Build_Project
-    jobs:
-      - job: publish
-        displayName: Publish Project
-        steps:
-          - task: DotNetCoreCLI@2
-            displayName: Publish
-            inputs:
-              command: publish
-              projects: $(projects)
-              arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+  # - stage: Publish_Project
+  #   displayName: Publish Project
+  #   dependsOn: Build_Project
+  #   jobs:
+  #     - job: publish
+  #       displayName: Publish Project
+  #       steps:
+  #         - task: DotNetCoreCLI@2
+  #           displayName: Publish
+  #           inputs:
+  #             command: publish
+  #             projects: $(projects)
+  #             arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
 
-  - stage: Upload_Artifact
-    displayName: Upload Artifact
-    dependsOn: Publish_Project
-    jobs:
-      - job: upload
-        displayName: Upload Artifact
-        steps:
-          - task: PublishBuildArtifacts@1
-            displayName: Publish Artifact
-            inputs:
-              PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-              ArtifactName: 'Gunjan-Artifacts'
+  # - stage: Upload_Artifact
+  #   displayName: Upload Artifact
+  #   dependsOn: Publish_Project
+  #   jobs:
+  #     - job: upload
+  #       displayName: Upload Artifact
+  #       steps:
+  #         - task: PublishBuildArtifacts@1
+  #           displayName: Publish Artifact
+  #           inputs:
+  #             PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+  #             ArtifactName: 'Gunjan-Artifacts'
 
-  - stage: Deploy_WebApp
-    displayName: Deploy to Azure Web App
-    dependsOn: Upload_Artifact
-    jobs:
-      - job: deploy
-        displayName: Deploy to Azure Web App
-        steps:
-          - task: AzureWebApp@1
-            displayName: Deploy to Azure Web App
-            inputs:
-              appType: webAppLinux
-              azureSubscription: 'Serv-Conn'
-              appName: '$(azureWebAppName)'
-              package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+  # - stage: Deploy_WebApp
+  #   displayName: Deploy to Azure Web App
+  #   dependsOn: Upload_Artifact
+  #   jobs:
+  #     - job: deploy
+  #       displayName: Deploy to Azure Web App
+  #       steps:
+  #         - task: AzureWebApp@1
+  #           displayName: Deploy to Azure Web App
+  #           inputs:
+  #             appType: webAppLinux
+  #             azureSubscription: 'Serv-Conn'
+  #             appName: '$(azureWebAppName)'
+  #             package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
