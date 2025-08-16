@@ -82,11 +82,17 @@ stages:
       - job: restore
         displayName: Restore NuGet Packages
         steps:
+          # - task: DotNetCoreCLI@2
+          #   displayName: Restore NuGet Packages
+          #   inputs:
+          #     command: restore
+          #     projects: $(projects)
+          
           - task: DotNetCoreCLI@2
-            displayName: Restore NuGet Packages
             inputs:
-              command: restore
-              projects: $(projects)
+              azureSubscription: 'Serv-Conn'
+              command: 'restore'
+              feedsToUse: 'select'
 
   - stage: Build_Project
     displayName: Build Project
