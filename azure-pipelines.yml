@@ -21,6 +21,7 @@ stages:
             inputs:
               packageType: 'sdk'
               version: '8.0.x'
+              installationPath: $(Agent.ToolsDirectory)/dotnet
 
   - stage: Restore_NuGet
     displayName: Restore NuGet Packages
