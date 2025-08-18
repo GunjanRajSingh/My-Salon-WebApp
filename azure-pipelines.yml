@@ -71,7 +71,15 @@ stages:
               projects: $(projects)
               arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
               zipAfterPublish: true
-
+          - task: ArchiveFiles@2
+            displayName: Archive published files
+            inputs:
+              rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'
+              includeRootFolder: false
+              archiveType: zip
+              archiveFile: '$(Build.ArtifactStagingDirectory)/$(azureWebAppName).zip'
+              replaceExistingArchive: true
+              
   - stage: Upload_Artifact
     displayName: Upload Artifact
     dependsOn: Publish_Project
