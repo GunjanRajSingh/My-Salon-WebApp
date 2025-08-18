@@ -1,94 +1,94 @@
-trigger:
-- main   # Jab main branch me push hoga, pipeline run karega
-
-pool:
-  vmImage: 'windows-latest'  # Microsoft-hosted Windows agent
-
-variables:
-  buildConfiguration: 'Release'
-  project: '$(Build.SourcesDirectory)\src\SalonWebsite\SalonWebsite.csproj' 
-  # project: '/src/SalonWebsite/SalonWebsite.csproj'      # Apne .csproj ka correct path
-  publishDir: '$(Build.SourcesDirectory)/publish'
-  webAppName: 'my-salon-webapp'                    # Apne Azure Web App ka naam
-  zipPath: '$(Build.ArtifactStagingDirectory)/app.zip'
-
-steps:
-# 1. .NET SDK install
-- task: UseDotNet@2
-  displayName: 'Install .NET SDK'
-  inputs:
-    packageType: 'sdk'
-    version: '8.0.x'
-
-# 2. Restore dependencies
-- script: dotnet restore $(project)
-  displayName: 'Restore dependencies'
-
-# 3. Build
-- script: dotnet build $(project) --configuration $(buildConfiguration) --no-restore
-  displayName: 'Build project'
-
-# 4. Publish
-- script: dotnet publish $(project) --configuration $(buildConfiguration) --output $(publishDir) --no-build
-  displayName: 'Publish project'
-
-# 5. Zip the publish folder
-- task: ArchiveFiles@2
-  displayName: 'Create ZIP package'
-  inputs:
-    rootFolderOrFile: '$(publishDir)'
-    includeRootFolder: false
-    archiveType: 'zip'
-    archiveFile: '$(zipPath)'
-    replaceExistingArchive: true
-
-# 6. Deploy to Azure Web App
-- task: AzureWebApp@1
-  displayName: 'Deploy to Azure Web App'
-  inputs:
-    azureSubscription: 'Serv-Conn'       # Service connection ka naam
-    appName: '$(webAppName)'              # Azure Web App ka naam
-    package: '$(zipPath)'                 # ZIP file ka path
-
-# =============================================================================================================================================================
-
 # trigger:
-# - main
+# - main   # Jab main branch me push hoga, pipeline run karega
 
 # pool:
-#   vmImage: 'windows-latest'
+#   vmImage: 'windows-latest'  # Microsoft-hosted Windows agent
 
 # variables:
 #   buildConfiguration: 'Release'
-#   azureWebAppName: 'My-Salon-WebApp'
-#   # projects: '**/*.csproj'
-#   projects: 'SalonWebsite/SalonWebsite.csproj'
+#   project: '$(Build.SourcesDirectory)\src\SalonWebsite\SalonWebsite.csproj' 
+#   # project: '/src/SalonWebsite/SalonWebsite.csproj'      # Apne .csproj ka correct path
+#   publishDir: '$(Build.SourcesDirectory)/publish'
+#   webAppName: 'my-salon-webapp'                    # Apne Azure Web App ka naam
+#   zipPath: '$(Build.ArtifactStagingDirectory)/app.zip'
 
-# stages:
-#   - stage: Install_DotNet
-#     displayName: Install .NET SDK
-#     jobs:
-#       - job: install_sdk
-#         displayName: Install .NET SDK
-#         steps:
-#           - task: UseDotNet@2
-#             displayName: Install .NET SDK
-#             inputs:
-#               packageType: 'sdk'
-#               version: '6.0.x'
+# steps:
+# # 1. .NET SDK install
+# - task: UseDotNet@2
+#   displayName: 'Install .NET SDK'
+#   inputs:
+#     packageType: 'sdk'
+#     version: '8.0.x'
 
-#   - stage: Restore_NuGet
-#     displayName: Restore NuGet Packages
-#     dependsOn: Install_DotNet
-#     jobs:
-#       - job: restore
-#         displayName: Restore NuGet Packages
-#         steps:
-#           - task: DotNetCoreCLI@2
-#             displayName: Restore NuGet Packages
-#             inputs:
-#               command: restore
-#               projects: $(projects)
+# # 2. Restore dependencies
+# - script: dotnet restore $(project)
+#   displayName: 'Restore dependencies'
+
+# # 3. Build
+# - script: dotnet build $(project) --configuration $(buildConfiguration) --no-restore
+#   displayName: 'Build project'
+
+# # 4. Publish
+# - script: dotnet publish $(project) --configuration $(buildConfiguration) --output $(publishDir) --no-build
+#   displayName: 'Publish project'
+
+# # 5. Zip the publish folder
+# - task: ArchiveFiles@2
+#   displayName: 'Create ZIP package'
+#   inputs:
+#     rootFolderOrFile: '$(publishDir)'
+#     includeRootFolder: false
+#     archiveType: 'zip'
+#     archiveFile: '$(zipPath)'
+#     replaceExistingArchive: true
+
+# # 6. Deploy to Azure Web App
+# - task: AzureWebApp@1
+#   displayName: 'Deploy to Azure Web App'
+#   inputs:
+#     azureSubscription: 'Serv-Conn'       # Service connection ka naam
+#     appName: '$(webAppName)'              # Azure Web App ka naam
+#     package: '$(zipPath)'                 # ZIP file ka path
+
+# =============================================================================================================================================================
+
+trigger:
+- main
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  buildConfiguration: 'Release'
+  azureWebAppName: 'My-Salon-WebApp'
+  # projects: '**/*.csproj'
+  projects: '**/My-Salon-WebApp.csproj'
+
+stages:
+  - stage: Install_DotNet
+    displayName: Install .NET SDK
+    jobs:
+      - job: install_sdk
+        displayName: Install .NET SDK
+        steps:
+          - task: UseDotNet@2
+            displayName: Install .NET SDK
+            inputs:
+              packageType: 'sdk'
+              version: '6.0.x'
+
+  - stage: Restore_NuGet
+    displayName: Restore NuGet Packages
+    dependsOn: Install_DotNet
+    jobs:
+      - job: restore
+        displayName: Restore NuGet Packages
+        steps:
+          - task: DotNetCoreCLI@2
+            displayName: Restore NuGet Packages
+            inputs:
+              command: restore
+              projects: $(projects)
           
           # - task: DotNetCoreCLI@2
           #   inputs:
