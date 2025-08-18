@@ -1,57 +1,3 @@
-# trigger:
-# - main   # Jab main branch me push hoga, pipeline run karega
-
-# pool:
-#   vmImage: 'windows-latest'  # Microsoft-hosted Windows agent
-
-# variables:
-#   buildConfiguration: 'Release'
-#   project: '$(Build.SourcesDirectory)\src\SalonWebsite\SalonWebsite.csproj' 
-#   # project: '/src/SalonWebsite/SalonWebsite.csproj'      # Apne .csproj ka correct path
-#   publishDir: '$(Build.SourcesDirectory)/publish'
-#   webAppName: 'my-salon-webapp'                    # Apne Azure Web App ka naam
-#   zipPath: '$(Build.ArtifactStagingDirectory)/app.zip'
-
-# steps:
-# # 1. .NET SDK install
-# - task: UseDotNet@2
-#   displayName: 'Install .NET SDK'
-#   inputs:
-#     packageType: 'sdk'
-#     version: '8.0.x'
-
-# # 2. Restore dependencies
-# - script: dotnet restore $(project)
-#   displayName: 'Restore dependencies'
-
-# # 3. Build
-# - script: dotnet build $(project) --configuration $(buildConfiguration) --no-restore
-#   displayName: 'Build project'
-
-# # 4. Publish
-# - script: dotnet publish $(project) --configuration $(buildConfiguration) --output $(publishDir) --no-build
-#   displayName: 'Publish project'
-
-# # 5. Zip the publish folder
-# - task: ArchiveFiles@2
-#   displayName: 'Create ZIP package'
-#   inputs:
-#     rootFolderOrFile: '$(publishDir)'
-#     includeRootFolder: false
-#     archiveType: 'zip'
-#     archiveFile: '$(zipPath)'
-#     replaceExistingArchive: true
-
-# # 6. Deploy to Azure Web App
-# - task: AzureWebApp@1
-#   displayName: 'Deploy to Azure Web App'
-#   inputs:
-#     azureSubscription: 'Serv-Conn'       # Service connection ka naam
-#     appName: '$(webAppName)'              # Azure Web App ka naam
-#     package: '$(zipPath)'                 # ZIP file ka path
-
-# =============================================================================================================================================================
-
 trigger:
 - main
 
@@ -61,7 +7,6 @@ pool:
 variables:
   buildConfiguration: 'Release'
   azureWebAppName: 'My-Salon-WebApp'
-  # projects: '**/*.csproj'
   projects: '**/My-Salon-WebApp.csproj'
 
 stages:
@@ -90,64 +35,64 @@ stages:
               command: restore
               projects: $(projects)
           
-          # - task: DotNetCoreCLI@2
-          #   inputs:
-          #     azureSubscription: 'Serv-Conn'
-          #     command: 'restore'
-          #     feedsToUse: 'select'
+          - task: DotNetCoreCLI@2
+            inputs:
+              azureSubscription: 'Serv-Conn'
+              command: 'restore'
+              feedsToUse: 'select'
 
-  # - stage: Build_Project
-  #   displayName: Build Project
-  #   dependsOn: Restore_NuGet
-  #   jobs:
-  #     - job: build
-  #       displayName: Build Project
-  #       steps:
-  #         - task: DotNetCoreCLI@2
-  #           displayName: Build Project
-  #           inputs:
-  #             command: build
-  #             projects: $(projects)
-  #             arguments: '--configuration $(buildConfiguration)'
+  - stage: Build_Project
+    displayName: Build Project
+    dependsOn: Restore_NuGet
+    jobs:
+      - job: build
+        displayName: Build Project
+        steps:
+          - task: DotNetCoreCLI@2
+            displayName: Build Project
+            inputs:
+              command: build
+              projects: $(projects)
+              arguments: '--configuration $(buildConfiguration)'
 
-  # - stage: Publish_Project
-  #   displayName: Publish Project
-  #   dependsOn: Build_Project
-  #   jobs:
-  #     - job: publish
-  #       displayName: Publish Project
-  #       steps:
-  #         - task: DotNetCoreCLI@2
-  #           displayName: Publish
-  #           inputs:
-  #             command: publish
-  #             projects: $(projects)
-  #             arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+  - stage: Publish_Project
+    displayName: Publish Project
+    dependsOn: Build_Project
+    jobs:
+      - job: publish
+        displayName: Publish Project
+        steps:
+          - task: DotNetCoreCLI@2
+            displayName: Publish
+            inputs:
+              command: publish
+              projects: $(projects)
+              arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
 
-  # - stage: Upload_Artifact
-  #   displayName: Upload Artifact
-  #   dependsOn: Publish_Project
-  #   jobs:
-  #     - job: upload
-  #       displayName: Upload Artifact
-  #       steps:
-  #         - task: PublishBuildArtifacts@1
-  #           displayName: Publish Artifact
-  #           inputs:
-  #             PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-  #             ArtifactName: 'Gunjan-Artifacts'
+  - stage: Upload_Artifact
+    displayName: Upload Artifact
+    dependsOn: Publish_Project
+    jobs:
+      - job: upload
+        displayName: Upload Artifact
+        steps:
+          - task: PublishBuildArtifacts@1
+            displayName: Publish Artifact
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+              ArtifactName: 'Gunjan-Artifacts'
 
-  # - stage: Deploy_WebApp
-  #   displayName: Deploy to Azure Web App
-  #   dependsOn: Upload_Artifact
-  #   jobs:
-  #     - job: deploy
-  #       displayName: Deploy to Azure Web App
-  #       steps:
-  #         - task: AzureWebApp@1
-  #           displayName: Deploy to Azure Web App
-  #           inputs:
-  #             appType: webAppLinux
-  #             azureSubscription: 'Serv-Conn'
-  #             appName: '$(azureWebAppName)'
-  #             package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+  - stage: Deploy_WebApp
+    displayName: Deploy to Azure Web App
+    dependsOn: Upload_Artifact
+    jobs:
+      - job: deploy
+        displayName: Deploy to Azure Web App
+        steps:
+          - task: AzureWebApp@1
+            displayName: Deploy to Azure Web App
+            inputs:
+              appType: webAppLinux
+              azureSubscription: 'Serv-Conn'
+              appName: '$(azureWebAppName)'
+              package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
