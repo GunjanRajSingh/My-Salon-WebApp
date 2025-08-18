@@ -191,6 +191,7 @@ stages:
             inputs:
               PathtoPublish: '$(Build.ArtifactStagingDirectory)'
               ArtifactName: 'Gunjan-Artifacts'
+              publishLocation: 'Container'
 
   - stage: Deploy_WebApp
     displayName: Deploy to Azure Web App
@@ -199,7 +200,7 @@ stages:
       - job: deploy
         steps:
           - download: current
-            artifact: Gunjan-Artifacts
+            artifact: 'Gunjan-Artifacts'
 
           - task: AzureWebApp@1
             displayName: Deploy to Azure Web App
