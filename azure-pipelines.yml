@@ -1,8 +1,120 @@
+# trigger:
+# - main
+
+# pool:
+#   vmImage: 'windows-2025'
+
+# variables:
+#   buildConfiguration: 'Release'
+#   azureWebAppName: 'My-Salon-WebApp'
+#   projects: '**/My-Salon-WebApp.csproj'
+
+# stages:
+#   - stage: Install_DotNet
+#     displayName: Install .NET SDK
+#     jobs:
+#       - job: install_sdk
+#         displayName: Install .NET SDK
+#         steps:
+#           - task: UseDotNet@2
+#             displayName: Install .NET SDK
+#             inputs:
+#               packageType: 'sdk'
+#               version: '8.0.x'
+#               installationPath: $(Agent.ToolsDirectory)/dotnet
+
+#   - stage: Restore_NuGet
+#     displayName: Restore NuGet Packages
+#     dependsOn: Install_DotNet
+#     jobs:
+#       - job: restore
+#         displayName: Restore NuGet Packages
+#         steps:
+#           - task: DotNetCoreCLI@2
+#             displayName: Restore NuGet Packages
+#             inputs:
+#               command: restore
+#               projects: $(projects)
+          
+#           - task: DotNetCoreCLI@2
+#             inputs:
+#               azureSubscription: 'Serv-Conn'
+#               command: 'restore'
+#               feedsToUse: 'select'
+
+#   - stage: Build_Project
+#     displayName: Build Project
+#     dependsOn: Restore_NuGet
+#     jobs:
+#       - job: build
+#         displayName: Build Project
+#         steps:
+#           - task: DotNetCoreCLI@2
+#             displayName: Build Project
+#             inputs:
+#               command: build
+#               projects: $(projects)
+#               arguments: '--configuration $(buildConfiguration)'
+
+#   - stage: Publish_Project
+#     displayName: Publish Project
+#     dependsOn: Build_Project
+#     jobs:
+#       - job: publish
+#         displayName: Publish Project
+#         steps:
+#           - task: DotNetCoreCLI@2
+#             displayName: Publish
+#             inputs:
+#               command: publish
+#               publishWebProjects: false
+#               projects: $(projects)
+#               arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+#               zipAfterPublish: true
+#           - task: ArchiveFiles@2
+#             displayName: Archive published files
+#             inputs:
+#               rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'
+#               includeRootFolder: false
+#               archiveType: zip
+#               archiveFile: '$(Build.ArtifactStagingDirectory)/$(azureWebAppName).zip'
+#               replaceExistingArchive: true
+
+#   - stage: Upload_Artifact
+#     displayName: Upload Artifact
+#     dependsOn: Publish_Project
+#     jobs:
+#       - job: upload
+#         displayName: Upload Artifact
+#         steps:
+#           - task: PublishBuildArtifacts@1
+#             displayName: Publish Artifact
+#             inputs:
+#               PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+#               ArtifactName: 'Gunjan-Artifacts'
+
+#   - stage: Deploy_WebApp
+#     displayName: Deploy to Azure Web App
+#     dependsOn: Upload_Artifact
+#     jobs:
+#       - job: deploy
+#         displayName: Deploy to Azure Web App
+#         steps:
+#           - task: AzureWebApp@1
+#             displayName: Deploy to Azure Web App
+#             inputs:
+#               appType: webAppLinux
+#               azureSubscription: 'Serv-Conn'
+#               appName: '$(azureWebAppName)'
+#               package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+#               package: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+# =================================================================================================================================
+
 trigger:
 - main
 
 pool:
-  vmImage: 'windows-2025'
+  vmImage: 'windows-latest'
 
 variables:
   buildConfiguration: 'Release'
@@ -14,40 +126,30 @@ stages:
     displayName: Install .NET SDK
     jobs:
       - job: install_sdk
-        displayName: Install .NET SDK
         steps:
           - task: UseDotNet@2
             displayName: Install .NET SDK
             inputs:
               packageType: 'sdk'
               version: '8.0.x'
-              installationPath: $(Agent.ToolsDirectory)/dotnet
 
   - stage: Restore_NuGet
     displayName: Restore NuGet Packages
     dependsOn: Install_DotNet
     jobs:
       - job: restore
-        displayName: Restore NuGet Packages
         steps:
           - task: DotNetCoreCLI@2
             displayName: Restore NuGet Packages
             inputs:
               command: restore
               projects: $(projects)
-          
-          - task: DotNetCoreCLI@2
-            inputs:
-              azureSubscription: 'Serv-Conn'
-              command: 'restore'
-              feedsToUse: 'select'
 
   - stage: Build_Project
     displayName: Build Project
     dependsOn: Restore_NuGet
     jobs:
       - job: build
-        displayName: Build Project
         steps:
           - task: DotNetCoreCLI@2
             displayName: Build Project
@@ -61,31 +163,28 @@ stages:
     dependsOn: Build_Project
     jobs:
       - job: publish
-        displayName: Publish Project
         steps:
           - task: DotNetCoreCLI@2
             displayName: Publish
             inputs:
               command: publish
-              publishWebProjects: false
               projects: $(projects)
               arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
-              zipAfterPublish: true
+
           - task: ArchiveFiles@2
             displayName: Archive published files
             inputs:
               rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'
               includeRootFolder: false
               archiveType: zip
-              archiveFile: '$(Build.ArtifactStagingDirectory)/$(azureWebAppName).zip'
+              archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
               replaceExistingArchive: true
-              
+
   - stage: Upload_Artifact
     displayName: Upload Artifact
     dependsOn: Publish_Project
     jobs:
       - job: upload
-        displayName: Upload Artifact
         steps:
           - task: PublishBuildArtifacts@1
             displayName: Publish Artifact
@@ -98,12 +197,14 @@ stages:
     dependsOn: Upload_Artifact
     jobs:
       - job: deploy
-        displayName: Deploy to Azure Web App
         steps:
+          - download: current
+            artifact: Gunjan-Artifacts
+
           - task: AzureWebApp@1
             displayName: Deploy to Azure Web App
             inputs:
-              appType: webAppLinux
+              appType: webApp
               azureSubscription: 'Serv-Conn'
               appName: '$(azureWebAppName)'
-              package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+              package: '$(Pipeline.Workspace)/Gunjan-Artifacts/$(Build.BuildId).zip'
