@@ -222,13 +222,15 @@ pool:
 variables:
   buildConfiguration: 'Release'
   azureWebAppName: 'My-Salon-WebApp'
-  projects: '**/My-Salon-WebApp.csproj'
+  # projects: '**/My-Salon-WebApp.csproj'
+  projects: 'My-Salon-WebApp.sln'
 
 stages:
-  - stage: Install_DotNet
-    displayName: Install .NET SDK
+  - stage: 
+    displayName: Install_DotNet
     jobs:
-      - job: install_sdk
+      - job:
+        displayName: Install DotNet
         steps:
           - task: UseDotNet@2
             displayName: Install .NET SDK
@@ -282,6 +284,7 @@ stages:
               archiveType: zip
               archiveFile: '$(Build.ArtifactStagingDirectory)/My-Salon-WebApp.zip'
               replaceExistingArchive: true
+
 
   - stage: Upload_Artifact
     displayName: Upload Artifact
