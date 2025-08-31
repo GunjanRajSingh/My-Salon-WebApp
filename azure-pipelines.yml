@@ -110,6 +110,109 @@
 #               package: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
 # =================================================================================================================================
 
+# trigger:
+# - main
+
+# pool:
+#   vmImage: 'windows-latest'
+
+# variables:
+#   buildConfiguration: 'Release'
+#   azureWebAppName: 'My-Salon-WebApp'
+#   projects: '**/My-Salon-WebApp.csproj'
+
+# stages:
+#   - stage: Install_DotNet
+#     displayName: Install .NET SDK
+#     jobs:
+#       - job: install_sdk
+#         steps:
+#           - task: UseDotNet@2
+#             displayName: Install .NET SDK
+#             inputs:
+#               packageType: 'sdk'
+#               version: '8.0.x'
+
+#   - stage: Restore_NuGet
+#     displayName: Restore NuGet Packages
+#     dependsOn: Install_DotNet
+#     jobs:
+#       - job: restore
+#         steps:
+#           - task: DotNetCoreCLI@2
+#             displayName: Restore NuGet Packages
+#             inputs:
+#               command: restore
+#               projects: $(projects)
+
+#   - stage: Build_Project
+#     displayName: Build Project
+#     dependsOn: Restore_NuGet
+#     jobs:
+#       - job: build
+#         steps:
+#           - task: DotNetCoreCLI@2
+#             displayName: Build Project
+#             inputs:
+#               command: build
+#               projects: $(projects)
+#               arguments: '--configuration $(buildConfiguration)'
+
+#   - stage: Publish_Project
+#     displayName: Publish Project
+#     dependsOn: Build_Project
+#     jobs:
+#       - job: publish
+#         steps:
+#           - task: DotNetCoreCLI@2
+#             displayName: Publish
+#             inputs:
+#               command: publish
+#               projects: $(projects)
+#               arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+
+#           - task: ArchiveFiles@2
+#             displayName: Archive published files
+#             inputs:
+#               rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'
+#               includeRootFolder: false
+#               archiveType: zip
+#               archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+#               replaceExistingArchive: true
+
+#   - stage: Upload_Artifact
+#     displayName: Upload Artifact
+#     dependsOn: Publish_Project
+#     jobs:
+#       - job: upload
+#         steps:
+#           - task: PublishBuildArtifacts@1
+#             displayName: Publish Artifact
+#             inputs:
+#               PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+#               ArtifactName: 'Gunjan-Artifacts'
+#               publishLocation: 'Container'
+
+#   - stage: Deploy_WebApp
+#     displayName: Deploy to Azure Web App
+#     dependsOn: Upload_Artifact
+#     jobs:
+#       - job: deploy
+#         steps:
+#           - download: current
+#             artifact: 'Gunjan-Artifacts'
+
+#           - task: AzureWebApp@1
+#             displayName: Deploy to Azure Web App
+#             inputs:
+#               appType: webApp
+#               azureSubscription: 'Serv-Conn'
+#               appName: '$(azureWebAppName)'
+#               package: '$(Pipeline.Workspace)/Gunjan-Artifacts/$(Build.BuildId).zip'
+
+
+# ================================================================================
+
 trigger:
 - main
 
@@ -177,7 +280,7 @@ stages:
               rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'
               includeRootFolder: false
               archiveType: zip
-              archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+              archiveFile: '$(Build.ArtifactStagingDirectory)/My-Salon-WebApp.zip'
               replaceExistingArchive: true
 
   - stage: Upload_Artifact
@@ -202,10 +305,16 @@ stages:
           - download: current
             artifact: 'Gunjan-Artifacts'
 
+          # Debug step (optional, for checking artifact content)
+          - script: |
+              echo "Listing contents of downloaded artifact:"
+              dir "$(Pipeline.Workspace)\Gunjan-Artifacts"
+            displayName: "Check Artifact Content"
+
           - task: AzureWebApp@1
             displayName: Deploy to Azure Web App
             inputs:
               appType: webApp
               azureSubscription: 'Serv-Conn'
               appName: '$(azureWebAppName)'
-              package: '$(Pipeline.Workspace)/Gunjan-Artifacts/$(Build.BuildId).zip'
+              package: '$(Pipeline.Workspace)/Gunjan-Artifacts/My-Salon-WebApp.zip'
