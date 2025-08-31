@@ -317,7 +317,7 @@ stages:
           - task: AzureWebApp@1
             displayName: Deploy to Azure Web App
             inputs:
-              appType: webApp
+              appType: webAppLinux
               azureSubscription: 'Serv-Conn'
               appName: '$(azureWebAppName)'
               package: '$(Pipeline.Workspace)/Gunjan-Artifacts/My-Salon-WebApp.zip'
