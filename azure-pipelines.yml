@@ -223,7 +223,7 @@
 #   buildConfiguration: 'Release'
 #   azureWebAppName: 'My-Salon-WebApp'
 #   # projects: '**/My-Salon-WebApp.csproj'
-#   projects: 'My-Salon-WebApp.sln'
+#   projects: $(projects)
 
 # stages:
 #   - stage: 
@@ -248,7 +248,7 @@
 #             displayName: Restore NuGet Packages
 #             inputs:
 #               command: restore
-#               projects: 'My-Salon-WebApp.sln'
+#               projects: $(projects)
 
 #   - stage: Build_Project
 #     displayName: Build Project
@@ -342,6 +342,7 @@ pool:
 variables:
   buildConfiguration: 'Release'
   azureWebAppName: 'My-Salon-WebApp'
+  projects: 'My-Salon-WebApp/My-Salon-WebApp.sln' 
 
 stages:
   - stage: Install_DotNet
@@ -365,7 +366,7 @@ stages:
             displayName: Restore NuGet Packages
             inputs:
               command: restore
-              projects: 'My-Salon-WebApp.sln'
+              projects: $(projects)
 
   - stage: Build_Project
     displayName: Build Project
@@ -377,7 +378,7 @@ stages:
             displayName: Build Project
             inputs:
               command: build
-              projects: 'My-Salon-WebApp.sln'
+              projects: $(projects)
               arguments: '--configuration $(buildConfiguration)'
 
   - stage: Publish_Project
@@ -390,7 +391,7 @@ stages:
             displayName: Publish
             inputs:
               command: publish
-              projects: 'My-Salon-WebApp.sln'
+              projects: $(projects)
               arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
 
           # Debug step - check publish output
