@@ -367,7 +367,7 @@ stages:
             displayName: Restore NuGet Packages
             inputs:
               command: restore
-              projects: $(projects)
+              projects: '$(Build.SourcesDirectory)/My-Salon-WebApp/My-Salon-WebApp.sln'
 
   - stage: Build_Project
     displayName: Build Project
