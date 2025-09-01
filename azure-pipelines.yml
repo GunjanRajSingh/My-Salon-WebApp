@@ -343,7 +343,8 @@ variables:
   buildConfiguration: 'Release'
   azureWebAppName: 'My-Salon-WebApp'
   # projects: 'My-Salon-WebApp/My-Salon-WebApp.sln' 
-  projects: '**/*.sln'
+  # projects: '**/*.sln'
+  projects: 'My-Salon-WebApp.sln'
 
 stages:
   - stage: Install_DotNet
@@ -367,7 +368,7 @@ stages:
             displayName: Restore NuGet Packages
             inputs:
               command: restore
-              projects: '$(Build.SourcesDirectory)/My-Salon-WebApp/My-Salon-WebApp.sln'
+              projects: 'My-Salon-WebApp.sln'
 
   - stage: Build_Project
     displayName: Build Project
