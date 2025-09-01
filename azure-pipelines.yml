@@ -342,7 +342,8 @@ pool:
 variables:
   buildConfiguration: 'Release'
   azureWebAppName: 'My-Salon-WebApp'
-  projects: 'My-Salon-WebApp/My-Salon-WebApp.sln' 
+  # projects: 'My-Salon-WebApp/My-Salon-WebApp.sln' 
+  projects: '**/*.sln'
 
 stages:
   - stage: Install_DotNet
